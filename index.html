@@ -2881,103 +2881,213 @@
 
         // Generate Installation PDF content
         function generateInstallationPDF(pdf, data, yPos) {
-            pdf.setFontSize(12);
-            pdf.setFont(undefined, 'bold');
-            
-            // Client information
-            pdf.text('INFORMATIONS CLIENT', 15, yPos);
-            yPos += 8;
-            pdf.setFont(undefined, 'normal');
             pdf.setFontSize(10);
             
-            const clientInfo = [
-                ['N° Client:', data.num_client || ''],
-                ['Nom:', data.nom_client || ''],
-                ['Prénom:', data.prenom_client || ''],
-                ['Adresse:', data.adresse || ''],
-                ['NPA / Localité:', `${data.npa || ''} ${data.localite || ''}`],
-                ['Téléphone:', data.telephone || ''],
-                ['Email:', data.email || '']
+            // Create two column layout for client and intervention info
+            // Client info table (left side)
+            const clientData = [
+                ['N° Client', data.num_client || ''],
+                ['Nom', data.nom_client || ''],
+                ['Prénom', data.prenom_client || ''],
+                ['Adresse', data.adresse || ''],
+                ['NPA', data.npa || ''],
+                ['Localité', data.localite || ''],
+                ['Téléphone', data.telephone || ''],
+                ['Tél. fixe', data.telephone_fixe || ''],
+                ['Email', data.email || '']
             ];
             
-            clientInfo.forEach(item => {
-                pdf.setFont(undefined, 'bold');
-                pdf.text(item[0], 15, yPos);
-                pdf.setFont(undefined, 'normal');
-                pdf.text(item[1], 50, yPos);
-                yPos += 7;
+            pdf.autoTable({
+                head: [['INFORMATIONS CLIENT', '']],
+                body: clientData,
+                startY: yPos,
+                startX: 15,
+                tableWidth: 85,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [244, 230, 0], 
+                    textColor: [0, 0, 0],
+                    fontSize: 11,
+                    fontStyle: 'bold'
+                },
+                styles: { 
+                    fontSize: 9,
+                    cellPadding: 2
+                },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 30 },
+                    1: { cellWidth: 55 }
+                }
             });
             
-            yPos += 5;
-            
-            // Intervention information
-            pdf.setFont(undefined, 'bold');
-            pdf.setFontSize(12);
-            pdf.text('INFORMATIONS INTERVENTION', 15, yPos);
-            yPos += 8;
-            pdf.setFont(undefined, 'normal');
-            pdf.setFontSize(10);
-            
-            const interventionInfo = [
-                ['Date intervention:', data.date_intervention || ''],
-                ['Heure début:', data.heure_debut || ''],
-                ['Heure fin:', data.heure_fin || ''],
-                ['Type installation:', data.type_installation || ''],
-                ['Technicien:', data.technicien || '']
+            // Intervention info table (right side)
+            const interventionData = [
+                ['Date intervention', data.date_intervention || ''],
+                ['Heure début', data.heure_debut || ''],
+                ['Heure fin', data.heure_fin || ''],
+                ['Type installation', data.type_installation || ''],
+                ['Technicien', data.technicien || ''],
+                ['Date mise service', data.date_mise_service || ''],
+                ['Nom conseiller', data.nom_conseiller || ''],
+                ['Horaire ouverture', data.horaire_ouverture || '']
             ];
             
-            interventionInfo.forEach(item => {
-                pdf.setFont(undefined, 'bold');
-                pdf.text(item[0], 15, yPos);
-                pdf.setFont(undefined, 'normal');
-                pdf.text(item[1], 50, yPos);
-                yPos += 7;
+            pdf.autoTable({
+                head: [['INTERVENTION', '']],
+                body: interventionData,
+                startY: yPos,
+                startX: 110,
+                tableWidth: 85,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [244, 230, 0], 
+                    textColor: [0, 0, 0],
+                    fontSize: 11,
+                    fontStyle: 'bold'
+                },
+                styles: { 
+                    fontSize: 9,
+                    cellPadding: 2
+                },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 35 },
+                    1: { cellWidth: 50 }
+                }
             });
             
-            // Check for page break
-            if (yPos > 250) {
-                pdf.addPage();
-                yPos = 20;
+            yPos = Math.max(pdf.lastAutoTable.finalY) + 5;
+            
+            // Operations performed
+            const operations = [];
+            if (data.op_installation === 'on') operations.push('Installation');
+            if (data.op_demontage === 'on') operations.push('Démontage');
+            if (data.op_remontage === 'on') operations.push('Remontage');
+            if (data.op_demenagement === 'on') operations.push('Déménagement');
+            if (data.op_reception_cle === 'on') operations.push('Réception clé');
+            if (data.op_rajout === 'on') operations.push('Rajout matériel');
+            if (data.op_deplacement === 'on') operations.push('Déplacement matériel');
+            if (data.op_probleme === 'on') operations.push('Problème matériel');
+            if (data.op_remplacement === 'on') operations.push('Remplacement matériel');
+            if (data.op_autres === 'on' && data.op_autres_text) operations.push('Autres: ' + data.op_autres_text);
+            
+            if (operations.length > 0) {
+                const opsData = operations.map(op => [op]);
+                pdf.autoTable({
+                    head: [['OPÉRATIONS EFFECTUÉES']],
+                    body: opsData,
+                    startY: yPos,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
             }
             
-            yPos += 5;
-            
             // Technical information
-            pdf.setFont(undefined, 'bold');
-            pdf.setFontSize(12);
-            pdf.text('INFORMATIONS TECHNIQUES', 15, yPos);
-            yPos += 8;
-            pdf.setFont(undefined, 'normal');
-            pdf.setFontSize(10);
-            
-            const techInfo = [
-                ['N° série centrale:', data.num_serie_centrale || ''],
-                ['N° téléphone SIM:', data.num_telephone_sim || ''],
-                ['Type centrale:', data.type_centrale || ''],
-                ['Mot de passe:', data.mot_de_passe || '']
+            const techData = [
+                ['N° série centrale', data.num_serie_centrale || '', 'Type centrale', data.type_centrale || ''],
+                ['N° téléphone SIM', data.num_telephone_sim || '', 'Mot de passe', data.mot_de_passe || ''],
+                ['Nombre radars', data.nombre_radars || '', 'Nombre contacts', data.nombre_contacts || ''],
+                ['Nombre télécommandes', data.nombre_telecommandes || '', 'Nombre claviers', data.nombre_claviers || ''],
+                ['Autres équipements', data.autres_equipements || '', '', '']
             ];
             
-            techInfo.forEach(item => {
-                pdf.setFont(undefined, 'bold');
-                pdf.text(item[0], 15, yPos);
-                pdf.setFont(undefined, 'normal');
-                pdf.text(item[1], 50, yPos);
-                yPos += 7;
+            pdf.autoTable({
+                head: [['INFORMATIONS TECHNIQUES', '', '', '']],
+                body: techData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [244, 230, 0], 
+                    textColor: [0, 0, 0],
+                    fontSize: 11,
+                    fontStyle: 'bold'
+                },
+                styles: { fontSize: 9, cellPadding: 2 },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 40 },
+                    1: { cellWidth: 45 },
+                    2: { fontStyle: 'bold', cellWidth: 40 },
+                    3: { cellWidth: 45 }
+                }
             });
+            yPos = pdf.lastAutoTable.finalY + 5;
             
-            // Material table if exists
-            if (data['materiel_nom[]']) {
-                if (yPos > 200) {
-                    pdf.addPage();
-                    yPos = 20;
+            // Battery replacement
+            const piles = [];
+            if (data.pile_centrale_qty && data.pile_centrale_qty !== '0') piles.push(['Centrale', data.pile_centrale_qty]);
+            if (data.pile_clavier_qty && data.pile_clavier_qty !== '0') piles.push(['Clavier', data.pile_clavier_qty]);
+            if (data.pile_dv_qty && data.pile_dv_qty !== '0') piles.push(['DV', data.pile_dv_qty]);
+            if (data.pile_dvc_qty && data.pile_dvc_qty !== '0') piles.push(['DVC', data.pile_dvc_qty]);
+            if (data.pile_do_qty && data.pile_do_qty !== '0') piles.push(['DO', data.pile_do_qty]);
+            if (data.pile_df_qty && data.pile_df_qty !== '0') piles.push(['DF', data.pile_df_qty]);
+            if (data.pile_tcde_qty && data.pile_tcde_qty !== '0') piles.push(['TCDE', data.pile_tcde_qty]);
+            
+            if (piles.length > 0) {
+                pdf.autoTable({
+                    head: [['REMPLACEMENT DE PILES', 'Quantité']],
+                    body: piles,
+                    startY: yPos,
+                    tableWidth: 80,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Installation control
+            const controles = [];
+            if (data.ctrl_zone === 'on') controles.push('Zone');
+            if (data.ctrl_quantite === 'on') controles.push('Quantité matériel');
+            if (data.ctrl_parametre === 'on') controles.push('Paramètre TMT & APN');
+            if (data.ctrl_detection === 'on') controles.push('Test de détection');
+            if (data.ctrl_transmission === 'on') controles.push('Test de transmission');
+            if (data.ctrl_protege === 'on') controles.push('Système protégé par détecteur');
+            if (data.ctrl_secteur === 'on') controles.push('Système sur secteur');
+            if (data.ctrl_instructions === 'on') controles.push('Instructions');
+            if (data.ctrl_telephone === 'on') controles.push('Téléphone');
+            if (data.ctrl_internet === 'on') controles.push('Internet du client');
+            if (data.ctrl_divers === 'on') controles.push('Divers');
+            
+            if (controles.length > 0) {
+                // Split into 2 columns for better layout
+                const controlData = [];
+                for (let i = 0; i < controles.length; i += 2) {
+                    controlData.push([
+                        '✓ ' + controles[i],
+                        controles[i + 1] ? '✓ ' + controles[i + 1] : ''
+                    ]);
                 }
                 
-                yPos += 10;
-                pdf.setFont(undefined, 'bold');
-                pdf.setFontSize(12);
-                pdf.text('MATÉRIEL INSTALLÉ', 15, yPos);
-                yPos += 10;
-                
+                pdf.autoTable({
+                    head: [['CONTRÔLE D\'INSTALLATION', '']],
+                    body: controlData,
+                    startY: yPos,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Material installed
+            if (data['materiel_nom[]']) {
                 const materielNoms = Array.isArray(data['materiel_nom[]']) ? data['materiel_nom[]'] : [data['materiel_nom[]']];
                 const materielQty = Array.isArray(data['materiel_qty[]']) ? data['materiel_qty[]'] : [data['materiel_qty[]']];
                 const materielLoc = Array.isArray(data['materiel_loc[]']) ? data['materiel_loc[]'] : [data['materiel_loc[]']];
@@ -2995,49 +3105,291 @@
                 
                 if (tableData.length > 0) {
                     pdf.autoTable({
-                        head: [['Matériel', 'Quantité', 'Localisation']],
+                        head: [['MATÉRIEL INSTALLÉ', 'Quantité', 'Localisation']],
                         body: tableData,
                         startY: yPos,
                         theme: 'grid',
-                        headStyles: { fillColor: [244, 230, 0], textColor: [0, 0, 0] },
-                        styles: { fontSize: 10 }
+                        headStyles: { 
+                            fillColor: [244, 230, 0], 
+                            textColor: [0, 0, 0],
+                            fontSize: 11,
+                            fontStyle: 'bold'
+                        },
+                        styles: { fontSize: 9, cellPadding: 2 }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 5;
+                }
+            }
+            
+            // Zone description
+            const zoneInfo = [];
+            if (data.nombre_niveaux) zoneInfo.push(['Nombre de niveaux', data.nombre_niveaux]);
+            if (data.carte_sim) zoneInfo.push(['Carte SIM', data.carte_sim]);
+            if (data.code_immeuble) zoneInfo.push(['Code immeuble', data.code_immeuble]);
+            
+            const typesBatiment = [];
+            if (data.type_villa === 'on') typesBatiment.push('Villa');
+            if (data.type_appartement === 'on') typesBatiment.push('Appartement');
+            if (data.type_arcade === 'on') typesBatiment.push('Arcade');
+            if (data.type_entreprise === 'on') typesBatiment.push('Entreprise');
+            
+            if (typesBatiment.length > 0) {
+                zoneInfo.push(['Type de bâtiment', typesBatiment.join(', ')]);
+            }
+            
+            if (zoneInfo.length > 0) {
+                pdf.autoTable({
+                    head: [['DESCRIPTIF DES ZONES', '']],
+                    body: zoneInfo,
+                    startY: yPos,
+                    tableWidth: 100,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 40 },
+                        1: { cellWidth: 60 }
+                    }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Zone channels
+            if (data['zone_tempo_entree[]']) {
+                const tempoEntree = Array.isArray(data['zone_tempo_entree[]']) ? data['zone_tempo_entree[]'] : [data['zone_tempo_entree[]']];
+                const tempoSortie = Array.isArray(data['zone_tempo_sortie[]']) ? data['zone_tempo_sortie[]'] : [data['zone_tempo_sortie[]']];
+                const zoneEtage = Array.isArray(data['zone_etage[]']) ? data['zone_etage[]'] : [data['zone_etage[]']];
+                
+                const zoneData = [];
+                for (let i = 0; i < tempoEntree.length; i++) {
+                    if (tempoEntree[i] || tempoSortie[i] || zoneEtage[i]) {
+                        zoneData.push([
+                            `Canal ${i + 1}`,
+                            tempoEntree[i] || '',
+                            tempoSortie[i] || '',
+                            zoneEtage[i] || ''
+                        ]);
+                    }
+                }
+                
+                if (zoneData.length > 0) {
+                    pdf.autoTable({
+                        head: [['Canal', 'Tempo entrée', 'Tempo sortie', 'Étage']],
+                        body: zoneData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [244, 230, 0], 
+                            textColor: [0, 0, 0],
+                            fontSize: 11,
+                            fontStyle: 'bold'
+                        },
+                        styles: { fontSize: 9, cellPadding: 2 }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 5;
+                }
+            }
+            
+            // Check for page break before observations
+            if (yPos > 200) {
+                pdf.addPage();
+                yPos = 20;
+            }
+            
+            // Observations
+            const observations = [];
+            if (data.explication_intervention) observations.push(['Explication intervention', data.explication_intervention]);
+            if (data.observations_technicien) observations.push(['Observations technicien', data.observations_technicien]);
+            if (data.observations_client) observations.push(['Observations client', data.observations_client]);
+            if (data.observation_responsable) observations.push(['Observation responsable', data.observation_responsable]);
+            
+            if (observations.length > 0) {
+                observations.forEach(obs => {
+                    pdf.setFont(undefined, 'bold');
+                    pdf.setFontSize(10);
+                    pdf.text(obs[0] + ':', 15, yPos);
+                    yPos += 5;
+                    pdf.setFont(undefined, 'normal');
+                    pdf.setFontSize(9);
+                    
+                    const lines = pdf.splitTextToSize(obs[1], 180);
+                    lines.forEach(line => {
+                        pdf.text(line, 15, yPos);
+                        yPos += 4;
+                    });
+                    yPos += 3;
+                });
+            }
+            
+            // Key handover
+            if (data.remise_cles) {
+                pdf.autoTable({
+                    head: [['REMISE DES CLÉS AU TECHNICIEN']],
+                    body: [[
+                        data.remise_cles === 'oui' ? '✓ Les clés sont remises au technicien ce jour' :
+                        data.remise_cles === 'transmettre' ? '✓ Le client se charge de nous les transmettre' :
+                        '✓ Le client ne souhaite pas remettre ses clés'
+                    ]],
+                    startY: yPos,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 3 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Installation period
+            const periodData = [];
+            if (data.date_installation) periodData.push(['Date installation', data.date_installation]);
+            if (data.date_fin_installation) periodData.push(['Date fin installation', data.date_fin_installation]);
+            
+            if (periodData.length > 0) {
+                pdf.autoTable({
+                    head: [['PÉRIODE D\'INSTALLATION', '']],
+                    body: periodData,
+                    startY: yPos,
+                    tableWidth: 100,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 45 },
+                        1: { cellWidth: 55 }
+                    }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Contact persons
+            if (data['contact_nom[]']) {
+                const contactNoms = Array.isArray(data['contact_nom[]']) ? data['contact_nom[]'] : [data['contact_nom[]']];
+                const contactAdresses = Array.isArray(data['contact_adresse[]']) ? data['contact_adresse[]'] : [data['contact_adresse[]']];
+                const contactTels = Array.isArray(data['contact_tel[]']) ? data['contact_tel[]'] : [data['contact_tel[]']];
+                const contactMdps = Array.isArray(data['contact_mdp[]']) ? data['contact_mdp[]'] : [data['contact_mdp[]']];
+                const contactCles = Array.isArray(data['contact_cle[]']) ? data['contact_cle[]'] : [data['contact_cle[]']];
+                const contactLiens = Array.isArray(data['contact_lien[]']) ? data['contact_lien[]'] : [data['contact_lien[]']];
+                
+                const contactData = [];
+                for (let i = 0; i < contactNoms.length; i++) {
+                    if (contactNoms[i] && contactNoms[i].trim() !== '') {
+                        contactData.push([
+                            contactNoms[i] || '',
+                            contactAdresses[i] || '',
+                            contactTels[i] || '',
+                            contactCles[i] || '',
+                            contactLiens[i] || ''
+                        ]);
+                    }
+                }
+                
+                if (contactData.length > 0) {
+                    pdf.autoTable({
+                        head: [['PERSONNES DE CONTACT', 'Adresse', 'Tél.', 'Clé', 'Lien']],
+                        body: contactData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [244, 230, 0], 
+                            textColor: [0, 0, 0],
+                            fontSize: 11,
+                            fontStyle: 'bold'
+                        },
+                        styles: { 
+                            fontSize: 8, 
+                            cellPadding: 2 
+                        }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 5;
+                }
+            }
+            
+            // Billing at the end
+            const billingData = [];
+            if (data.total_deplacement) billingData.push(['Total déplacement HT', data.total_deplacement + ' CHF']);
+            if (data.total_main_oeuvre) billingData.push(['Total main d\'œuvre HT', data.total_main_oeuvre + ' CHF']);
+            if (data.total_materiel) billingData.push(['Total matériel HT', data.total_materiel + ' CHF']);
+            if (data.total_montant) billingData.push(['TOTAL MONTANT HT', data.total_montant + ' CHF']);
+            
+            if (billingData.length > 0) {
+                // Check for page break
+                if (yPos > 220) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                
+                pdf.autoTable({
+                    head: [['FACTURATION', '']],
+                    body: billingData,
+                    startY: yPos,
+                    tableWidth: 100,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 60 },
+                        1: { cellWidth: 40, halign: 'right' }
+                    },
+                    didParseCell: function(data) {
+                        if (data.row.index === billingData.length - 1) {
+                            data.cell.styles.fontStyle = 'bold';
+                            data.cell.styles.fontSize = 10;
+                        }
+                    }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+                
+                // Payment methods
+                const payments = [];
+                if (data.paiement_comptant === 'on') payments.push('Paiement comptant');
+                if (data.paiement_carte === 'on') payments.push('Carte bancaire');
+                if (data.paiement_bulletin === 'on') payments.push('Bulletin de versement');
+                if (data.paiement_autres === 'on') payments.push('Autres');
+                
+                if (payments.length > 0) {
+                    pdf.autoTable({
+                        head: [['Mode de paiement']],
+                        body: [[payments.join(' • ')]],
+                        startY: yPos,
+                        tableWidth: 100,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [244, 230, 0], 
+                            textColor: [0, 0, 0],
+                            fontSize: 10,
+                            fontStyle: 'bold'
+                        },
+                        styles: { fontSize: 9, cellPadding: 2 }
                     });
                     yPos = pdf.lastAutoTable.finalY + 10;
                 }
             }
             
-            // Key handover
-            if (data.remise_cles) {
-                if (yPos > 250) {
-                    pdf.addPage();
-                    yPos = 20;
-                }
-                
-                pdf.setFont(undefined, 'bold');
-                pdf.setFontSize(12);
-                pdf.text('REMISE DES CLÉS', 15, yPos);
-                yPos += 8;
-                pdf.setFont(undefined, 'normal');
-                pdf.setFontSize(10);
-                
-                let keyText = '';
-                if (data.remise_cles === 'oui') {
-                    keyText = 'Les clés sont remises au technicien ce jour';
-                } else if (data.remise_cles === 'transmettre') {
-                    keyText = 'Le client se charge de nous les transmettre dans les plus brefs délais';
-                } else if (data.remise_cles === 'refuse') {
-                    keyText = 'Le client ne souhaite pas remettre ses clés';
-                }
-                pdf.text(keyText, 15, yPos);
-                yPos += 10;
-            }
-            
-            // Signatures
-            if (yPos > 220) {
+            // Signatures at the bottom
+            if (yPos > 230) {
                 pdf.addPage();
                 yPos = 20;
             } else {
-                yPos = 220;
+                yPos = 230;
             }
             
             pdf.setFont(undefined, 'bold');
@@ -3054,99 +3406,402 @@
 
         // Generate SAV Modifications PDF content
         function generateSAVModificationsPDF(pdf, data, yPos) {
-            pdf.setFontSize(12);
-            pdf.setFont(undefined, 'bold');
-            
-            // Client information
-            pdf.text('INFORMATIONS CLIENT', 15, yPos);
-            yPos += 8;
-            pdf.setFont(undefined, 'normal');
             pdf.setFontSize(10);
             
-            const clientInfo = [
-                ['N° Client:', data.sav_mod_num_client || ''],
-                ['Nom:', data.sav_mod_nom_client || ''],
-                ['Prénom:', data.sav_mod_prenom_client || ''],
-                ['Adresse:', data.sav_mod_adresse || ''],
-                ['NPA / Localité:', `${data.sav_mod_npa || ''} ${data.sav_mod_localite || ''}`],
-                ['Téléphone:', data.sav_mod_telephone || ''],
-                ['Email:', data.sav_mod_email || '']
+            // Client and intervention info in two columns
+            const clientData = [
+                ['N° Client', data.sav_mod_num_client || ''],
+                ['Nom', data.sav_mod_nom_client || ''],
+                ['Prénom', data.sav_mod_prenom_client || ''],
+                ['Adresse', data.sav_mod_adresse || ''],
+                ['NPA', data.sav_mod_npa || ''],
+                ['Localité', data.sav_mod_localite || ''],
+                ['Téléphone', data.sav_mod_telephone || ''],
+                ['Email', data.sav_mod_email || '']
             ];
             
-            clientInfo.forEach(item => {
-                pdf.setFont(undefined, 'bold');
-                pdf.text(item[0], 15, yPos);
-                pdf.setFont(undefined, 'normal');
-                pdf.text(item[1], 50, yPos);
-                yPos += 7;
+            pdf.autoTable({
+                head: [['INFORMATIONS CLIENT', '']],
+                body: clientData,
+                startY: yPos,
+                startX: 15,
+                tableWidth: 85,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [244, 230, 0], 
+                    textColor: [0, 0, 0],
+                    fontSize: 11,
+                    fontStyle: 'bold'
+                },
+                styles: { fontSize: 9, cellPadding: 2 },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 30 },
+                    1: { cellWidth: 55 }
+                }
             });
             
-            // Add operations performed
-            yPos += 5;
-            pdf.setFont(undefined, 'bold');
-            pdf.setFontSize(12);
-            pdf.text('OPÉRATIONS EFFECTUÉES', 15, yPos);
-            yPos += 8;
-            pdf.setFont(undefined, 'normal');
-            pdf.setFontSize(10);
+            const interventionData = [
+                ['Date intervention', data.sav_mod_date_intervention || ''],
+                ['Heure début', data.sav_mod_heure_debut || ''],
+                ['Heure fin', data.sav_mod_heure_fin || ''],
+                ['Type installation', data.sav_mod_type_installation || ''],
+                ['Technicien', data.sav_mod_technicien || ''],
+                ['Horaire ouverture', data.sav_mod_horaire_ouverture || '']
+            ];
             
+            pdf.autoTable({
+                head: [['INTERVENTION', '']],
+                body: interventionData,
+                startY: yPos,
+                startX: 110,
+                tableWidth: 85,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [244, 230, 0], 
+                    textColor: [0, 0, 0],
+                    fontSize: 11,
+                    fontStyle: 'bold'
+                },
+                styles: { fontSize: 9, cellPadding: 2 },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 35 },
+                    1: { cellWidth: 50 }
+                }
+            });
+            
+            yPos = Math.max(pdf.lastAutoTable.finalY) + 5;
+            
+            // Operations
             const operations = [];
-            if (data.sav_mod_op_installation) operations.push('Installation');
-            if (data.sav_mod_op_demontage) operations.push('Démontage');
-            if (data.sav_mod_op_remontage) operations.push('Remontage');
-            if (data.sav_mod_op_demenagement) operations.push('Déménagement');
-            if (data.sav_mod_op_reception_cle) operations.push('Réception des clés');
-            if (data.sav_mod_op_rajout) operations.push('Rajout matériel');
-            if (data.sav_mod_op_deplacement) operations.push('Déplacement matériel');
-            if (data.sav_mod_op_probleme) operations.push('Problème matériel');
-            if (data.sav_mod_op_remplacement) operations.push('Remplacement matériel');
-            if (data.sav_mod_op_autres) operations.push(`Autres: ${data.sav_mod_op_autres_text || ''}`);
+            if (data.sav_mod_op_installation === 'on') operations.push('Installation');
+            if (data.sav_mod_op_demontage === 'on') operations.push('Démontage');
+            if (data.sav_mod_op_remontage === 'on') operations.push('Remontage');
+            if (data.sav_mod_op_demenagement === 'on') operations.push('Déménagement');
+            if (data.sav_mod_op_reception_cle === 'on') operations.push('Réception des clés');
+            if (data.sav_mod_op_rajout === 'on') operations.push('Rajout matériel');
+            if (data.sav_mod_op_deplacement === 'on') operations.push('Déplacement matériel');
+            if (data.sav_mod_op_probleme === 'on') operations.push('Problème matériel');
+            if (data.sav_mod_op_remplacement === 'on') operations.push('Remplacement matériel');
+            if (data.sav_mod_op_autres === 'on' && data.sav_mod_op_autres_text) operations.push('Autres: ' + data.sav_mod_op_autres_text);
             
-            operations.forEach(op => {
-                pdf.text('• ' + op, 20, yPos);
-                yPos += 6;
+            if (operations.length > 0) {
+                const opsData = operations.map(op => [op]);
+                pdf.autoTable({
+                    head: [['OPÉRATIONS EFFECTUÉES']],
+                    body: opsData,
+                    startY: yPos,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Battery replacement
+            const piles = [];
+            if (data.sav_mod_pile_centrale && data.sav_mod_pile_centrale !== '0') piles.push(['Centrale', data.sav_mod_pile_centrale]);
+            if (data.sav_mod_pile_clavier && data.sav_mod_pile_clavier !== '0') piles.push(['Clavier', data.sav_mod_pile_clavier]);
+            if (data.sav_mod_pile_dv && data.sav_mod_pile_dv !== '0') piles.push(['DV', data.sav_mod_pile_dv]);
+            if (data.sav_mod_pile_dvc && data.sav_mod_pile_dvc !== '0') piles.push(['DVC', data.sav_mod_pile_dvc]);
+            if (data.sav_mod_pile_do && data.sav_mod_pile_do !== '0') piles.push(['DO', data.sav_mod_pile_do]);
+            if (data.sav_mod_pile_df && data.sav_mod_pile_df !== '0') piles.push(['DF', data.sav_mod_pile_df]);
+            if (data.sav_mod_pile_tcde && data.sav_mod_pile_tcde !== '0') piles.push(['TCDE', data.sav_mod_pile_tcde]);
+            
+            if (piles.length > 0) {
+                pdf.autoTable({
+                    head: [['REMPLACEMENT DE PILES', 'Quantité']],
+                    body: piles,
+                    startY: yPos,
+                    tableWidth: 80,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Technical information
+            const techData = [
+                ['N° série centrale', data.sav_mod_num_serie_centrale || '', 'Type centrale', data.sav_mod_type_centrale || ''],
+                ['N° téléphone SIM', data.sav_mod_num_telephone_sim || '', 'Mot de passe', data.sav_mod_mot_de_passe || ''],
+                ['Nombre radars', data.sav_mod_nombre_radars || '', 'Nombre contacts', data.sav_mod_nombre_contacts || ''],
+                ['Nombre télécommandes', data.sav_mod_nombre_telecommandes || '', 'Nombre claviers', data.sav_mod_nombre_claviers || ''],
+                ['Autres équipements', data.sav_mod_autres_equipements || '', '', '']
+            ];
+            
+            pdf.autoTable({
+                head: [['INFORMATIONS TECHNIQUES', '', '', '']],
+                body: techData,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [244, 230, 0], 
+                    textColor: [0, 0, 0],
+                    fontSize: 11,
+                    fontStyle: 'bold'
+                },
+                styles: { fontSize: 9, cellPadding: 2 },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 40 },
+                    1: { cellWidth: 45 },
+                    2: { fontStyle: 'bold', cellWidth: 40 },
+                    3: { cellWidth: 45 }
+                }
             });
+            yPos = pdf.lastAutoTable.finalY + 5;
+            
+            // Installation control
+            const controles = [];
+            if (data.sav_mod_ctrl_zone === 'on') controles.push('Zone');
+            if (data.sav_mod_ctrl_quantite === 'on') controles.push('Quantité matériel');
+            if (data.sav_mod_ctrl_parametre === 'on') controles.push('Paramètre TMT & APN');
+            if (data.sav_mod_ctrl_detection === 'on') controles.push('Test de détection');
+            if (data.sav_mod_ctrl_transmission === 'on') controles.push('Test de transmission');
+            if (data.sav_mod_ctrl_protege === 'on') controles.push('Système protégé par détecteur');
+            if (data.sav_mod_ctrl_secteur === 'on') controles.push('Système sur secteur');
+            if (data.sav_mod_ctrl_instructions === 'on') controles.push('Instructions');
+            if (data.sav_mod_ctrl_telephone === 'on') controles.push('Téléphone et internet du client');
+            if (data.sav_mod_ctrl_divers === 'on') controles.push('Divers');
+            
+            if (controles.length > 0) {
+                const controlData = [];
+                for (let i = 0; i < controles.length; i += 2) {
+                    controlData.push([
+                        '✓ ' + controles[i],
+                        controles[i + 1] ? '✓ ' + controles[i + 1] : ''
+                    ]);
+                }
+                
+                pdf.autoTable({
+                    head: [['CONTRÔLE D\'INSTALLATION', '']],
+                    body: controlData,
+                    startY: yPos,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Zone description
+            const zoneInfo = [];
+            if (data.sav_mod_nombre_etages) zoneInfo.push(['Nombre d\'étages', data.sav_mod_nombre_etages]);
+            if (data.sav_mod_etages) zoneInfo.push(['Étages', data.sav_mod_etages]);
+            if (data.sav_mod_code_immeuble) zoneInfo.push(['Code immeuble', data.sav_mod_code_immeuble]);
+            if (data.sav_mod_equipement_supplementaire) zoneInfo.push(['Équipement supplémentaire', data.sav_mod_equipement_supplementaire]);
+            
+            const typesBatiment = [];
+            if (data.sav_mod_type_villa === 'on') typesBatiment.push('Villa');
+            if (data.sav_mod_type_appartement === 'on') typesBatiment.push('Appartement');
+            if (data.sav_mod_type_arcade === 'on') typesBatiment.push('Arcade');
+            if (data.sav_mod_type_entreprise === 'on') typesBatiment.push('Entreprise');
+            
+            if (typesBatiment.length > 0) {
+                zoneInfo.push(['Type de bâtiment', typesBatiment.join(', ')]);
+            }
+            
+            if (zoneInfo.length > 0) {
+                pdf.autoTable({
+                    head: [['DESCRIPTIF DES ZONES', '']],
+                    body: zoneInfo,
+                    startY: yPos,
+                    tableWidth: 120,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 2 },
+                    columnStyles: {
+                        0: { fontStyle: 'bold', cellWidth: 45 },
+                        1: { cellWidth: 75 }
+                    }
+                });
+                yPos = pdf.lastAutoTable.finalY + 5;
+            }
+            
+            // Zone channels
+            if (data['sav_mod_zone_tempo_entree[]']) {
+                const tempoEntree = Array.isArray(data['sav_mod_zone_tempo_entree[]']) ? data['sav_mod_zone_tempo_entree[]'] : [data['sav_mod_zone_tempo_entree[]']];
+                const tempoSortie = Array.isArray(data['sav_mod_zone_tempo_sortie[]']) ? data['sav_mod_zone_tempo_sortie[]'] : [data['sav_mod_zone_tempo_sortie[]']];
+                const zoneEtage = Array.isArray(data['sav_mod_zone_etage[]']) ? data['sav_mod_zone_etage[]'] : [data['sav_mod_zone_etage[]']];
+                
+                const zoneData = [];
+                for (let i = 0; i < tempoEntree.length; i++) {
+                    if (tempoEntree[i] || tempoSortie[i] || zoneEtage[i]) {
+                        zoneData.push([
+                            `Canal ${i + 1}`,
+                            tempoEntree[i] || '',
+                            tempoSortie[i] || '',
+                            zoneEtage[i] || ''
+                        ]);
+                    }
+                }
+                
+                if (zoneData.length > 0) {
+                    pdf.autoTable({
+                        head: [['Canal', 'Tempo entrée', 'Tempo sortie', 'Étage']],
+                        body: zoneData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [244, 230, 0], 
+                            textColor: [0, 0, 0],
+                            fontSize: 11,
+                            fontStyle: 'bold'
+                        },
+                        styles: { fontSize: 9, cellPadding: 2 }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 5;
+                }
+            }
             
             // Observations
-            if (data.sav_mod_observations_technicien || data.sav_mod_explication_intervention) {
+            const observations = [];
+            if (data.sav_mod_observations_technicien) observations.push(['Observations technicien', data.sav_mod_observations_technicien]);
+            if (data.sav_mod_explication_intervention) observations.push(['Explication intervention', data.sav_mod_explication_intervention]);
+            if (data.sav_mod_observations_client) observations.push(['Observation client', data.sav_mod_observations_client]);
+            if (data.sav_mod_observation_responsable) observations.push(['Observation responsable', data.sav_mod_observation_responsable]);
+            
+            if (observations.length > 0) {
                 if (yPos > 200) {
                     pdf.addPage();
                     yPos = 20;
                 }
                 
-                yPos += 10;
-                pdf.setFont(undefined, 'bold');
-                pdf.setFontSize(12);
-                pdf.text('OBSERVATIONS', 15, yPos);
-                yPos += 8;
-                pdf.setFont(undefined, 'normal');
-                pdf.setFontSize(10);
-                
-                if (data.sav_mod_explication_intervention) {
+                observations.forEach(obs => {
                     pdf.setFont(undefined, 'bold');
-                    pdf.text('Explication intervention:', 15, yPos);
-                    yPos += 6;
-                    pdf.setFont(undefined, 'normal');
-                    const lines = pdf.splitTextToSize(data.sav_mod_explication_intervention, 170);
-                    lines.forEach(line => {
-                        pdf.text(line, 20, yPos);
-                        yPos += 5;
-                    });
+                    pdf.setFontSize(10);
+                    pdf.text(obs[0] + ':', 15, yPos);
                     yPos += 5;
+                    pdf.setFont(undefined, 'normal');
+                    pdf.setFontSize(9);
+                    
+                    const lines = pdf.splitTextToSize(obs[1], 180);
+                    lines.forEach(line => {
+                        pdf.text(line, 15, yPos);
+                        yPos += 4;
+                    });
+                    yPos += 3;
+                });
+            }
+            
+            // Contact persons
+            if (data['sav_mod_contact_nom[]']) {
+                const contactNoms = Array.isArray(data['sav_mod_contact_nom[]']) ? data['sav_mod_contact_nom[]'] : [data['sav_mod_contact_nom[]']];
+                const contactAdresses = Array.isArray(data['sav_mod_contact_adresse[]']) ? data['sav_mod_contact_adresse[]'] : [data['sav_mod_contact_adresse[]']];
+                const contactCles = Array.isArray(data['sav_mod_contact_cle[]']) ? data['sav_mod_contact_cle[]'] : [data['sav_mod_contact_cle[]']];
+                const contactLiens = Array.isArray(data['sav_mod_contact_lien[]']) ? data['sav_mod_contact_lien[]'] : [data['sav_mod_contact_lien[]']];
+                const contactTels = Array.isArray(data['sav_mod_contact_tel[]']) ? data['sav_mod_contact_tel[]'] : [data['sav_mod_contact_tel[]']];
+                const contactMdps = Array.isArray(data['sav_mod_contact_mdp[]']) ? data['sav_mod_contact_mdp[]'] : [data['sav_mod_contact_mdp[]']];
+                
+                const contactData = [];
+                for (let i = 0; i < contactNoms.length; i++) {
+                    if (contactNoms[i] && contactNoms[i].trim() !== '') {
+                        contactData.push([
+                            contactNoms[i] || '',
+                            contactAdresses[i] || '',
+                            contactTels[i] || '',
+                            contactCles[i] || '',
+                            contactLiens[i] || ''
+                        ]);
+                    }
                 }
                 
-                if (data.sav_mod_observations_technicien) {
-                    pdf.setFont(undefined, 'bold');
-                    pdf.text('Observations technicien:', 15, yPos);
-                    yPos += 6;
-                    pdf.setFont(undefined, 'normal');
-                    const lines = pdf.splitTextToSize(data.sav_mod_observations_technicien, 170);
-                    lines.forEach(line => {
-                        pdf.text(line, 20, yPos);
-                        yPos += 5;
+                if (contactData.length > 0) {
+                    if (yPos > 200) {
+                        pdf.addPage();
+                        yPos = 20;
+                    }
+                    
+                    pdf.autoTable({
+                        head: [['PERSONNES DE CONTACT', 'Adresse', 'Tél.', 'Clé', 'Lien']],
+                        body: contactData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [244, 230, 0], 
+                            textColor: [0, 0, 0],
+                            fontSize: 11,
+                            fontStyle: 'bold'
+                        },
+                        styles: { fontSize: 8, cellPadding: 2 }
                     });
+                    yPos = pdf.lastAutoTable.finalY + 5;
                 }
             }
+            
+            // Facturation at the end
+            const facturationOptions = [];
+            if (data.sav_mod_fact_deplacement === 'on') facturationOptions.push('Total déplacement HT');
+            if (data.sav_mod_fact_main_oeuvre === 'on') facturationOptions.push('Total main d\'œuvre HT');
+            if (data.sav_mod_fact_materiel === 'on') facturationOptions.push('Total matériel HT');
+            if (data.sav_mod_fact_montant === 'on') facturationOptions.push('Total montant HT');
+            
+            const paiementOptions = [];
+            if (data.sav_mod_paiement_comptant === 'on') paiementOptions.push('Paiement comptant');
+            if (data.sav_mod_paiement_carte === 'on') paiementOptions.push('Carte bancaire');
+            if (data.sav_mod_paiement_bulletin === 'on') paiementOptions.push('Bulletin de versement');
+            if (data.sav_mod_paiement_autres === 'on') paiementOptions.push('Autres');
+            
+            if (facturationOptions.length > 0 || paiementOptions.length > 0) {
+                if (yPos > 220) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                
+                pdf.autoTable({
+                    head: [['FACTURATION']],
+                    body: [
+                        [facturationOptions.join(' • ')],
+                        ['Mode de paiement: ' + paiementOptions.join(' • ')]
+                    ],
+                    startY: yPos,
+                    theme: 'grid',
+                    headStyles: { 
+                        fillColor: [244, 230, 0], 
+                        textColor: [0, 0, 0],
+                        fontSize: 11,
+                        fontStyle: 'bold'
+                    },
+                    styles: { fontSize: 9, cellPadding: 3 }
+                });
+                yPos = pdf.lastAutoTable.finalY + 10;
+            }
+            
+            // Signatures at the bottom
+            if (yPos > 230) {
+                pdf.addPage();
+                yPos = 20;
+            } else {
+                yPos = 230;
+            }
+            
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(10);
+            pdf.text('Signature Technicien:', 15, yPos);
+            pdf.text('Signature Client:', 110, yPos);
+            
+            pdf.setDrawColor(0, 0, 0);
+            pdf.rect(15, yPos + 5, 75, 30);
+            pdf.rect(110, yPos + 5, 75, 30);
             
             return yPos;
         }
