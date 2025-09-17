@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dialarme - Application</title>
+    <!-- jsPDF library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -482,6 +485,21 @@
             margin-top: 10px;
         }
 
+        .form-label.required::after {
+            content: ' *';
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .validation-message {
+            background: #ff3333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .documents-grid {
@@ -576,6 +594,9 @@
                 <form id="documentForm">
                     <!-- Installation Form -->
                     <div id="installationForm" style="display: none;">
+                        <div class="validation-message" id="validationMessage">
+                            Veuillez remplir tous les champs obligatoires marqués d'un astérisque rouge (*)
+                        </div>
                         <!-- Section 1: Informations générales -->
                         <div class="form-section">
                             <div class="form-section-title">Informations générales</div>
@@ -595,28 +616,28 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">N° de client</label>
-                                    <input type="text" class="form-input" name="num_client">
+                                    <label class="form-label required">N° de client</label>
+                                    <input type="text" class="form-input" name="num_client" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Date d'intervention</label>
-                                    <input type="date" class="form-input" name="date_intervention" id="date_intervention_install">
+                                    <label class="form-label required">Date d'intervention</label>
+                                    <input type="date" class="form-input" name="date_intervention" id="date_intervention_install" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Type d'installation</label>
-                                    <input type="text" class="form-input" name="type_installation">
+                                    <label class="form-label required">Type d'installation</label>
+                                    <input type="text" class="form-input" name="type_installation" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Heure de début</label>
-                                    <input type="time" class="form-input" name="heure_debut">
+                                    <label class="form-label required">Heure de début</label>
+                                    <input type="time" class="form-input" name="heure_debut" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Heure de fin</label>
-                                    <input type="time" class="form-input" name="heure_fin">
+                                    <label class="form-label required">Heure de fin</label>
+                                    <input type="time" class="form-input" name="heure_fin" required>
                                 </div>
                             </div>
                         </div>
@@ -626,26 +647,30 @@
                             <div class="form-section-title">Informations client</div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Nom</label>
-                                    <input type="text" class="form-input" name="nom_client">
+                                    <label class="form-label required">Nom</label>
+                                    <input type="text" class="form-input" name="nom_client" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Prénom</label>
-                                    <input type="text" class="form-input" name="prenom_client">
+                                    <label class="form-label required">Prénom</label>
+                                    <input type="text" class="form-input" name="prenom_client" required>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Adresse</label>
-                                <input type="text" class="form-input" name="adresse">
+                                <label class="form-label required">Adresse</label>
+                                <input type="text" class="form-input" name="adresse" required>
                             </div>
-                            <div class="form-row">
+                            <div class="form-row-3">
                                 <div class="form-group">
-                                    <label class="form-label">Localité</label>
-                                    <input type="text" class="form-input" name="localite">
+                                    <label class="form-label required">NPA</label>
+                                    <input type="text" class="form-input" name="npa" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Téléphone</label>
-                                    <input type="tel" class="form-input" name="telephone">
+                                    <label class="form-label required">Localité</label>
+                                    <input type="text" class="form-input" name="localite" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Téléphone</label>
+                                    <input type="tel" class="form-input" name="telephone" required>
                                 </div>
                             </div>
                             <div class="form-row">
@@ -654,8 +679,8 @@
                                     <input type="tel" class="form-input" name="telephone_fixe">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Adresse mail</label>
-                                    <input type="email" class="form-input" name="email">
+                                    <label class="form-label required">Adresse mail</label>
+                                    <input type="email" class="form-input" name="email" required>
                                 </div>
                             </div>
                         </div>
@@ -858,16 +883,16 @@
                                     <thead>
                                         <tr>
                                             <th>Matériel</th>
-                                            <th>Quantité</th>
-                                            <th>Localisation</th>
+                                            <th>Quantité *</th>
+                                            <th>Localisation *</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="materielBody">
                                         <tr>
-                                            <td><input type="text" name="materiel_nom[]"></td>
-                                            <td><input type="number" name="materiel_qty[]" min="1"></td>
-                                            <td><input type="text" name="materiel_loc[]"></td>
+                                            <td><input type="text" name="materiel_nom[]" placeholder="Nom du matériel"></td>
+                                            <td><input type="number" name="materiel_qty[]" min="1" placeholder="Requis *" required></td>
+                                            <td><input type="text" name="materiel_loc[]" placeholder="Requis *" required></td>
                                             <td><button type="button" class="btn btn-remove" onclick="removeRow(this)">Supprimer</button></td>
                                         </tr>
                                     </tbody>
@@ -1003,17 +1028,18 @@
                         <!-- Section 11: Remise des clés -->
                         <div class="form-section">
                             <div class="form-section-title">Remise des clés au technicien</div>
+                            <p style="color: #ff0000; font-size: 14px; margin-bottom: 10px;">* Champ obligatoire</p>
                             <div class="radio-group">
                                 <div class="radio-item">
-                                    <input type="radio" id="cle_oui" name="remise_cles" value="oui">
+                                    <input type="radio" id="cle_oui" name="remise_cles" value="oui" required>
                                     <label for="cle_oui">Oui, les clés sont remises au technicien ce jour</label>
                                 </div>
                                 <div class="radio-item">
-                                    <input type="radio" id="cle_transmettre" name="remise_cles" value="transmettre">
+                                    <input type="radio" id="cle_transmettre" name="remise_cles" value="transmettre" required>
                                     <label for="cle_transmettre">Non, le client se charge de nous les transmettre dans les plus brefs délais</label>
                                 </div>
                                 <div class="radio-item">
-                                    <input type="radio" id="cle_refuse" name="remise_cles" value="refuse">
+                                    <input type="radio" id="cle_refuse" name="remise_cles" value="refuse" required>
                                     <label for="cle_refuse">Non, le client ne souhaite pas remettre ses clés</label>
                                 </div>
                             </div>
@@ -1034,12 +1060,12 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Date de mise en service</label>
-                                    <input type="date" class="form-input" name="date_mise_service">
+                                    <label class="form-label required">Date de mise en service</label>
+                                    <input type="date" class="form-input" name="date_mise_service" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Nom du conseiller</label>
-                                    <input type="text" class="form-input" name="nom_conseiller">
+                                    <label class="form-label required">Nom du conseiller</label>
+                                    <input type="text" class="form-input" name="nom_conseiller" required>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -1083,13 +1109,16 @@
 
                     <!-- SAV avec modifications Form -->
                     <div id="savModificationsForm" style="display: none;">
+                        <div class="validation-message" id="savModValidationMessage">
+                            Veuillez remplir tous les champs obligatoires marqués d'un astérisque rouge (*)
+                        </div>
                         <!-- Section 1: Informations générales -->
                         <div class="form-section">
                             <div class="form-section-title">Informations générales</div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">N° de client</label>
-                                    <input type="text" class="form-input" name="sav_mod_num_client">
+                                    <label class="form-label required">N° de client</label>
+                                    <input type="text" class="form-input" name="sav_mod_num_client" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Technicien</label>
@@ -1108,22 +1137,22 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Date d'intervention</label>
-                                    <input type="date" class="form-input" name="sav_mod_date_intervention" id="date_intervention_sav_mod">
+                                    <label class="form-label required">Date d'intervention</label>
+                                    <input type="date" class="form-input" name="sav_mod_date_intervention" id="date_intervention_sav_mod" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Type d'installation</label>
-                                    <input type="text" class="form-input" name="sav_mod_type_installation">
+                                    <label class="form-label required">Type d'installation</label>
+                                    <input type="text" class="form-input" name="sav_mod_type_installation" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Heure de début</label>
-                                    <input type="time" class="form-input" name="sav_mod_heure_debut">
+                                    <label class="form-label required">Heure de début</label>
+                                    <input type="time" class="form-input" name="sav_mod_heure_debut" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Heure de fin</label>
-                                    <input type="time" class="form-input" name="sav_mod_heure_fin">
+                                    <label class="form-label required">Heure de fin</label>
+                                    <input type="time" class="form-input" name="sav_mod_heure_fin" required>
                                 </div>
                             </div>
                         </div>
@@ -1133,23 +1162,37 @@
                             <div class="form-section-title">Informations client</div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Nom</label>
-                                    <input type="text" class="form-input" name="sav_mod_nom_client">
+                                    <label class="form-label required">Nom</label>
+                                    <input type="text" class="form-input" name="sav_mod_nom_client" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Prénom</label>
-                                    <input type="text" class="form-input" name="sav_mod_prenom_client">
+                                    <label class="form-label required">Prénom</label>
+                                    <input type="text" class="form-input" name="sav_mod_prenom_client" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Adresse</label>
-                                    <input type="text" class="form-input" name="sav_mod_adresse">
+                                    <label class="form-label required">Adresse</label>
+                                    <input type="text" class="form-input" name="sav_mod_adresse" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Localité</label>
-                                    <input type="text" class="form-input" name="sav_mod_localite">
+                                    <label class="form-label required">NPA</label>
+                                    <input type="text" class="form-input" name="sav_mod_npa" required>
                                 </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label required">Localité</label>
+                                    <input type="text" class="form-input" name="sav_mod_localite" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Téléphone</label>
+                                    <input type="tel" class="form-input" name="sav_mod_telephone" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Adresse mail</label>
+                                <input type="email" class="form-input" name="sav_mod_email" required>
                             </div>
                         </div>
 
@@ -1504,13 +1547,16 @@
 
                     <!-- SAV démontage Form -->
                     <div id="savDemontageForm" style="display: none;">
+                        <div class="validation-message" id="savDemValidationMessage">
+                            Veuillez remplir tous les champs obligatoires marqués d'un astérisque rouge (*)
+                        </div>
                         <!-- Section 1: Informations générales -->
                         <div class="form-section">
                             <div class="form-section-title">Informations générales</div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">N° de client</label>
-                                    <input type="text" class="form-input" name="sav_dem_num_client">
+                                    <label class="form-label required">N° de client</label>
+                                    <input type="text" class="form-input" name="sav_dem_num_client" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">N° du contrat</label>
@@ -1519,57 +1565,73 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Nom</label>
-                                    <input type="text" class="form-input" name="sav_dem_nom_client">
+                                    <label class="form-label required">Nom</label>
+                                    <input type="text" class="form-input" name="sav_dem_nom_client" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Prénom</label>
-                                    <input type="text" class="form-input" name="sav_dem_prenom_client">
+                                    <label class="form-label required">Prénom</label>
+                                    <input type="text" class="form-input" name="sav_dem_prenom_client" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Adresse</label>
-                                    <input type="text" class="form-input" name="sav_dem_adresse">
+                                    <label class="form-label required">Adresse</label>
+                                    <input type="text" class="form-input" name="sav_dem_adresse" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Localité</label>
-                                    <input type="text" class="form-input" name="sav_dem_localite">
+                                    <label class="form-label required">NPA</label>
+                                    <input type="text" class="form-input" name="sav_dem_npa" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Date d'intervention</label>
-                                    <input type="date" class="form-input" name="sav_dem_date_intervention" id="date_intervention_sav_dem">
+                                    <label class="form-label required">Localité</label>
+                                    <input type="text" class="form-input" name="sav_dem_localite" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Type d'installation</label>
-                                    <input type="text" class="form-input" name="sav_dem_type_installation">
+                                    <label class="form-label required">Téléphone</label>
+                                    <input type="tel" class="form-input" name="sav_dem_telephone" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Heure de début</label>
-                                    <input type="time" class="form-input" name="sav_dem_heure_debut">
+                                    <label class="form-label required">Adresse mail</label>
+                                    <input type="email" class="form-input" name="sav_dem_email" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Heure de fin</label>
-                                    <input type="time" class="form-input" name="sav_dem_heure_fin">
+                                    <label class="form-label required">Type d'installation</label>
+                                    <input type="text" class="form-input" name="sav_dem_type_installation" required>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Technicien</label>
-                                <select class="form-input" name="sav_dem_technicien" required>
-                                    <option value="">Sélectionner un technicien...</option>
-                                    <option value="Alexis DEVILLE">Alexis DEVILLE</option>
-                                    <option value="Corentin LE JONCOUR">Corentin LE JONCOUR</option>
-                                    <option value="Faith ERSOY">Faith ERSOY</option>
-                                    <option value="Guillaume BEX">Guillaume BEX</option>
-                                    <option value="Ismail ECH CHATOUI">Ismail ECH CHATOUI</option>
-                                    <option value="Jamal EL HALFI">Jamal EL HALFI</option>
-                                    <option value="Mathieu CLAVEL">Mathieu CLAVEL</option>
-                                    <option value="Sedat MADEN">Sedat MADEN</option>
-                                </select>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label required">Date d'intervention</label>
+                                    <input type="date" class="form-input" name="sav_dem_date_intervention" id="date_intervention_sav_dem" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Technicien</label>
+                                    <select class="form-input" name="sav_dem_technicien" required>
+                                        <option value="">Sélectionner un technicien...</option>
+                                        <option value="Alexis DEVILLE">Alexis DEVILLE</option>
+                                        <option value="Corentin LE JONCOUR">Corentin LE JONCOUR</option>
+                                        <option value="Faith ERSOY">Faith ERSOY</option>
+                                        <option value="Guillaume BEX">Guillaume BEX</option>
+                                        <option value="Ismail ECH CHATOUI">Ismail ECH CHATOUI</option>
+                                        <option value="Jamal EL HALFI">Jamal EL HALFI</option>
+                                        <option value="Mathieu CLAVEL">Mathieu CLAVEL</option>
+                                        <option value="Sedat MADEN">Sedat MADEN</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label required">Heure de début</label>
+                                    <input type="time" class="form-input" name="sav_dem_heure_debut" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Heure de fin</label>
+                                    <input type="time" class="form-input" name="sav_dem_heure_fin" required>
+                                </div>
                             </div>
                         </div>
 
@@ -1807,13 +1869,16 @@
 
                     <!-- SAV simple Form -->
                     <div id="savSimpleForm" style="display: none;">
+                        <div class="validation-message" id="savSimpleValidationMessage">
+                            Veuillez remplir tous les champs obligatoires marqués d'un astérisque rouge (*)
+                        </div>
                         <!-- Section 1: Informations générales -->
                         <div class="form-section">
                             <div class="form-section-title">Informations générales</div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">N° de client</label>
-                                    <input type="text" class="form-input" name="sav_simple_num_client">
+                                    <label class="form-label required">N° de client</label>
+                                    <input type="text" class="form-input" name="sav_simple_num_client" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">N° du contrat</label>
@@ -1822,57 +1887,73 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Nom</label>
-                                    <input type="text" class="form-input" name="sav_simple_nom_client">
+                                    <label class="form-label required">Nom</label>
+                                    <input type="text" class="form-input" name="sav_simple_nom_client" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Prénom</label>
-                                    <input type="text" class="form-input" name="sav_simple_prenom_client">
+                                    <label class="form-label required">Prénom</label>
+                                    <input type="text" class="form-input" name="sav_simple_prenom_client" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Adresse</label>
-                                    <input type="text" class="form-input" name="sav_simple_adresse">
+                                    <label class="form-label required">Adresse</label>
+                                    <input type="text" class="form-input" name="sav_simple_adresse" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Localité</label>
-                                    <input type="text" class="form-input" name="sav_simple_localite">
+                                    <label class="form-label required">NPA</label>
+                                    <input type="text" class="form-input" name="sav_simple_npa" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Date d'intervention</label>
-                                    <input type="date" class="form-input" name="sav_simple_date_intervention" id="date_intervention_sav_simple">
+                                    <label class="form-label required">Localité</label>
+                                    <input type="text" class="form-input" name="sav_simple_localite" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Type d'installation</label>
-                                    <input type="text" class="form-input" name="sav_simple_type_installation">
+                                    <label class="form-label required">Téléphone</label>
+                                    <input type="tel" class="form-input" name="sav_simple_telephone" required>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">Heure de début</label>
-                                    <input type="time" class="form-input" name="sav_simple_heure_debut">
+                                    <label class="form-label required">Adresse mail</label>
+                                    <input type="email" class="form-input" name="sav_simple_email" required>
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Heure de fin</label>
-                                    <input type="time" class="form-input" name="sav_simple_heure_fin">
+                                    <label class="form-label required">Type d'installation</label>
+                                    <input type="text" class="form-input" name="sav_simple_type_installation" required>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Technicien</label>
-                                <select class="form-input" name="sav_simple_technicien" required>
-                                    <option value="">Sélectionner un technicien...</option>
-                                    <option value="Alexis DEVILLE">Alexis DEVILLE</option>
-                                    <option value="Corentin LE JONCOUR">Corentin LE JONCOUR</option>
-                                    <option value="Faith ERSOY">Faith ERSOY</option>
-                                    <option value="Guillaume BEX">Guillaume BEX</option>
-                                    <option value="Ismail ECH CHATOUI">Ismail ECH CHATOUI</option>
-                                    <option value="Jamal EL HALFI">Jamal EL HALFI</option>
-                                    <option value="Mathieu CLAVEL">Mathieu CLAVEL</option>
-                                    <option value="Sedat MADEN">Sedat MADEN</option>
-                                </select>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label required">Date d'intervention</label>
+                                    <input type="date" class="form-input" name="sav_simple_date_intervention" id="date_intervention_sav_simple" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Technicien</label>
+                                    <select class="form-input" name="sav_simple_technicien" required>
+                                        <option value="">Sélectionner un technicien...</option>
+                                        <option value="Alexis DEVILLE">Alexis DEVILLE</option>
+                                        <option value="Corentin LE JONCOUR">Corentin LE JONCOUR</option>
+                                        <option value="Faith ERSOY">Faith ERSOY</option>
+                                        <option value="Guillaume BEX">Guillaume BEX</option>
+                                        <option value="Ismail ECH CHATOUI">Ismail ECH CHATOUI</option>
+                                        <option value="Jamal EL HALFI">Jamal EL HALFI</option>
+                                        <option value="Mathieu CLAVEL">Mathieu CLAVEL</option>
+                                        <option value="Sedat MADEN">Sedat MADEN</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label required">Heure de début</label>
+                                    <input type="time" class="form-input" name="sav_simple_heure_debut" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Heure de fin</label>
+                                    <input type="time" class="form-input" name="sav_simple_heure_fin" required>
+                                </div>
                             </div>
                         </div>
 
@@ -2551,9 +2632,9 @@
             const tbody = document.getElementById('materielBody');
             const newRow = tbody.insertRow();
             newRow.innerHTML = `
-                <td><input type="text" name="materiel_nom[]"></td>
-                <td><input type="number" name="materiel_qty[]" min="1"></td>
-                <td><input type="text" name="materiel_loc[]"></td>
+                <td><input type="text" name="materiel_nom[]" placeholder="Nom du matériel"></td>
+                <td><input type="number" name="materiel_qty[]" min="1" placeholder="Requis *" required></td>
+                <td><input type="text" name="materiel_loc[]" placeholder="Requis *" required></td>
                 <td><button type="button" class="btn btn-remove" onclick="removeRow(this)">Supprimer</button></td>
             `;
         }
@@ -2721,6 +2802,15 @@
 
         // Export to PDF
         function exportPDF() {
+            // Validate required fields first
+            if (!validateForm()) {
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // Collect form data
             const formData = new FormData(document.getElementById('documentForm'));
             const data = {};
             for (let [key, value] of formData.entries()) {
@@ -2734,9 +2824,797 @@
                 }
             }
             
-            console.log('Données du formulaire:', data);
+            // Add header with logo
+            pdf.setFillColor(0, 0, 0);
+            pdf.rect(0, 0, 210, 25, 'F');
+            pdf.setTextColor(244, 230, 0);
+            pdf.setFontSize(24);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('DIALARME', 105, 12, { align: 'center' });
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Documents techniques', 105, 20, { align: 'center' });
             
-            alert(`Document "${currentDocument}" prêt pour l'export PDF!\n\nToutes les données ont été collectées et sont prêtes pour la génération du PDF.\n\nPour une implémentation complète, intégrez une bibliothèque comme jsPDF ou générez le PDF côté serveur.`);
+            // Document title
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(18);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(currentDocument, 105, 40, { align: 'center' });
+            
+            let yPosition = 55;
+            
+            // Generate content based on document type
+            if (currentDocument === 'Installation') {
+                yPosition = generateInstallationPDF(pdf, data, yPosition);
+            } else if (currentDocument === 'SAV avec modifications') {
+                yPosition = generateSAVModificationsPDF(pdf, data, yPosition);
+            } else if (currentDocument === 'SAV démontage') {
+                yPosition = generateSAVDemontagePDF(pdf, data, yPosition);
+            } else if (currentDocument === 'SAV simple') {
+                yPosition = generateSAVSimplePDF(pdf, data, yPosition);
+            } else if (currentDocument === 'Facturier') {
+                yPosition = generateFacturierPDF(pdf, data, yPosition);
+            } else if (currentDocument === 'Quittance clé') {
+                yPosition = generateQuittancePDF(pdf, data, yPosition);
+            }
+            
+            // Add footer
+            const pageCount = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(8);
+                pdf.setTextColor(128, 128, 128);
+                pdf.text(`Page ${i} / ${pageCount}`, 105, 290, { align: 'center' });
+                pdf.text(new Date().toLocaleDateString('fr-FR'), 200, 290, { align: 'right' });
+            }
+            
+            // Generate filename
+            const clientName = data.nom_client || data.sav_mod_nom_client || data.sav_dem_nom_client || 
+                            data.sav_simple_nom_client || data.fact_nom_prenom || data.quit_nom || 'Client';
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `${currentDocument.replace(/\s+/g, '_')}_${clientName}_${date}.pdf`;
+            
+            // Save the PDF
+            pdf.save(filename);
+        }
+
+        // Generate Installation PDF content
+        function generateInstallationPDF(pdf, data, yPos) {
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            
+            // Client information
+            pdf.text('INFORMATIONS CLIENT', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const clientInfo = [
+                ['N° Client:', data.num_client || ''],
+                ['Nom:', data.nom_client || ''],
+                ['Prénom:', data.prenom_client || ''],
+                ['Adresse:', data.adresse || ''],
+                ['NPA / Localité:', `${data.npa || ''} ${data.localite || ''}`],
+                ['Téléphone:', data.telephone || ''],
+                ['Email:', data.email || '']
+            ];
+            
+            clientInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            yPos += 5;
+            
+            // Intervention information
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('INFORMATIONS INTERVENTION', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const interventionInfo = [
+                ['Date intervention:', data.date_intervention || ''],
+                ['Heure début:', data.heure_debut || ''],
+                ['Heure fin:', data.heure_fin || ''],
+                ['Type installation:', data.type_installation || ''],
+                ['Technicien:', data.technicien || '']
+            ];
+            
+            interventionInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Check for page break
+            if (yPos > 250) {
+                pdf.addPage();
+                yPos = 20;
+            }
+            
+            yPos += 5;
+            
+            // Technical information
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('INFORMATIONS TECHNIQUES', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const techInfo = [
+                ['N° série centrale:', data.num_serie_centrale || ''],
+                ['N° téléphone SIM:', data.num_telephone_sim || ''],
+                ['Type centrale:', data.type_centrale || ''],
+                ['Mot de passe:', data.mot_de_passe || '']
+            ];
+            
+            techInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Material table if exists
+            if (data['materiel_nom[]']) {
+                if (yPos > 200) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                
+                yPos += 10;
+                pdf.setFont(undefined, 'bold');
+                pdf.setFontSize(12);
+                pdf.text('MATÉRIEL INSTALLÉ', 15, yPos);
+                yPos += 10;
+                
+                const materielNoms = Array.isArray(data['materiel_nom[]']) ? data['materiel_nom[]'] : [data['materiel_nom[]']];
+                const materielQty = Array.isArray(data['materiel_qty[]']) ? data['materiel_qty[]'] : [data['materiel_qty[]']];
+                const materielLoc = Array.isArray(data['materiel_loc[]']) ? data['materiel_loc[]'] : [data['materiel_loc[]']];
+                
+                const tableData = [];
+                for (let i = 0; i < materielNoms.length; i++) {
+                    if (materielNoms[i] && materielNoms[i].trim() !== '') {
+                        tableData.push([
+                            materielNoms[i] || '',
+                            materielQty[i] || '',
+                            materielLoc[i] || ''
+                        ]);
+                    }
+                }
+                
+                if (tableData.length > 0) {
+                    pdf.autoTable({
+                        head: [['Matériel', 'Quantité', 'Localisation']],
+                        body: tableData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { fillColor: [244, 230, 0], textColor: [0, 0, 0] },
+                        styles: { fontSize: 10 }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 10;
+                }
+            }
+            
+            // Key handover
+            if (data.remise_cles) {
+                if (yPos > 250) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                
+                pdf.setFont(undefined, 'bold');
+                pdf.setFontSize(12);
+                pdf.text('REMISE DES CLÉS', 15, yPos);
+                yPos += 8;
+                pdf.setFont(undefined, 'normal');
+                pdf.setFontSize(10);
+                
+                let keyText = '';
+                if (data.remise_cles === 'oui') {
+                    keyText = 'Les clés sont remises au technicien ce jour';
+                } else if (data.remise_cles === 'transmettre') {
+                    keyText = 'Le client se charge de nous les transmettre dans les plus brefs délais';
+                } else if (data.remise_cles === 'refuse') {
+                    keyText = 'Le client ne souhaite pas remettre ses clés';
+                }
+                pdf.text(keyText, 15, yPos);
+                yPos += 10;
+            }
+            
+            // Signatures
+            if (yPos > 220) {
+                pdf.addPage();
+                yPos = 20;
+            } else {
+                yPos = 220;
+            }
+            
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(10);
+            pdf.text('Signature Technicien:', 15, yPos);
+            pdf.text('Signature Client:', 110, yPos);
+            
+            pdf.setDrawColor(0, 0, 0);
+            pdf.rect(15, yPos + 5, 75, 30);
+            pdf.rect(110, yPos + 5, 75, 30);
+            
+            return yPos;
+        }
+
+        // Generate SAV Modifications PDF content
+        function generateSAVModificationsPDF(pdf, data, yPos) {
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            
+            // Client information
+            pdf.text('INFORMATIONS CLIENT', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const clientInfo = [
+                ['N° Client:', data.sav_mod_num_client || ''],
+                ['Nom:', data.sav_mod_nom_client || ''],
+                ['Prénom:', data.sav_mod_prenom_client || ''],
+                ['Adresse:', data.sav_mod_adresse || ''],
+                ['NPA / Localité:', `${data.sav_mod_npa || ''} ${data.sav_mod_localite || ''}`],
+                ['Téléphone:', data.sav_mod_telephone || ''],
+                ['Email:', data.sav_mod_email || '']
+            ];
+            
+            clientInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Add operations performed
+            yPos += 5;
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('OPÉRATIONS EFFECTUÉES', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const operations = [];
+            if (data.sav_mod_op_installation) operations.push('Installation');
+            if (data.sav_mod_op_demontage) operations.push('Démontage');
+            if (data.sav_mod_op_remontage) operations.push('Remontage');
+            if (data.sav_mod_op_demenagement) operations.push('Déménagement');
+            if (data.sav_mod_op_reception_cle) operations.push('Réception des clés');
+            if (data.sav_mod_op_rajout) operations.push('Rajout matériel');
+            if (data.sav_mod_op_deplacement) operations.push('Déplacement matériel');
+            if (data.sav_mod_op_probleme) operations.push('Problème matériel');
+            if (data.sav_mod_op_remplacement) operations.push('Remplacement matériel');
+            if (data.sav_mod_op_autres) operations.push(`Autres: ${data.sav_mod_op_autres_text || ''}`);
+            
+            operations.forEach(op => {
+                pdf.text('• ' + op, 20, yPos);
+                yPos += 6;
+            });
+            
+            // Observations
+            if (data.sav_mod_observations_technicien || data.sav_mod_explication_intervention) {
+                if (yPos > 200) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                
+                yPos += 10;
+                pdf.setFont(undefined, 'bold');
+                pdf.setFontSize(12);
+                pdf.text('OBSERVATIONS', 15, yPos);
+                yPos += 8;
+                pdf.setFont(undefined, 'normal');
+                pdf.setFontSize(10);
+                
+                if (data.sav_mod_explication_intervention) {
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('Explication intervention:', 15, yPos);
+                    yPos += 6;
+                    pdf.setFont(undefined, 'normal');
+                    const lines = pdf.splitTextToSize(data.sav_mod_explication_intervention, 170);
+                    lines.forEach(line => {
+                        pdf.text(line, 20, yPos);
+                        yPos += 5;
+                    });
+                    yPos += 5;
+                }
+                
+                if (data.sav_mod_observations_technicien) {
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('Observations technicien:', 15, yPos);
+                    yPos += 6;
+                    pdf.setFont(undefined, 'normal');
+                    const lines = pdf.splitTextToSize(data.sav_mod_observations_technicien, 170);
+                    lines.forEach(line => {
+                        pdf.text(line, 20, yPos);
+                        yPos += 5;
+                    });
+                }
+            }
+            
+            return yPos;
+        }
+
+        // Generate SAV Démontage PDF content
+        function generateSAVDemontagePDF(pdf, data, yPos) {
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            
+            // Similar structure to SAV Modifications but with specific démontage fields
+            pdf.text('INFORMATIONS CLIENT', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const clientInfo = [
+                ['N° Client:', data.sav_dem_num_client || ''],
+                ['N° Contrat:', data.sav_dem_num_contrat || ''],
+                ['Nom:', data.sav_dem_nom_client || ''],
+                ['Prénom:', data.sav_dem_prenom_client || ''],
+                ['Adresse:', data.sav_dem_adresse || ''],
+                ['NPA / Localité:', `${data.sav_dem_npa || ''} ${data.sav_dem_localite || ''}`],
+                ['Téléphone:', data.sav_dem_telephone || ''],
+                ['Email:', data.sav_dem_email || '']
+            ];
+            
+            clientInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Destination du matériel
+            yPos += 10;
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('DESTINATION DU MATÉRIEL', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            if (data.sav_dem_destination === 'remontage') {
+                pdf.text('Démontage ou remontage dans nouveau domicile:', 15, yPos);
+                yPos += 6;
+                pdf.text(data.sav_dem_nouvelle_adresse || '', 20, yPos);
+            } else if (data.sav_dem_destination === 'reprise') {
+                pdf.text('Reprise du matériel par Dialarme', 15, yPos);
+            } else if (data.sav_dem_destination === 'remise') {
+                pdf.text('Remise du matériel au client', 15, yPos);
+            }
+            
+            return yPos;
+        }
+
+        // Generate SAV Simple PDF content
+        function generateSAVSimplePDF(pdf, data, yPos) {
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            
+            // Client information
+            pdf.text('INFORMATIONS CLIENT', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const clientInfo = [
+                ['N° Client:', data.sav_simple_num_client || ''],
+                ['N° Contrat:', data.sav_simple_num_contrat || ''],
+                ['Nom:', data.sav_simple_nom_client || ''],
+                ['Prénom:', data.sav_simple_prenom_client || ''],
+                ['Adresse:', data.sav_simple_adresse || ''],
+                ['NPA / Localité:', `${data.sav_simple_npa || ''} ${data.sav_simple_localite || ''}`],
+                ['Téléphone:', data.sav_simple_telephone || ''],
+                ['Email:', data.sav_simple_email || '']
+            ];
+            
+            clientInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Facture if exists
+            if (data['sav_simple_fact_produit[]']) {
+                if (yPos > 180) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                
+                yPos += 10;
+                pdf.setFont(undefined, 'bold');
+                pdf.setFontSize(12);
+                pdf.text('FACTURE DÉTAILLÉE', 15, yPos);
+                yPos += 10;
+                
+                const produits = Array.isArray(data['sav_simple_fact_produit[]']) ? 
+                                data['sav_simple_fact_produit[]'] : [data['sav_simple_fact_produit[]']];
+                const qty = Array.isArray(data['sav_simple_fact_qty[]']) ? 
+                           data['sav_simple_fact_qty[]'] : [data['sav_simple_fact_qty[]']];
+                const pu = Array.isArray(data['sav_simple_fact_pu[]']) ? 
+                          data['sav_simple_fact_pu[]'] : [data['sav_simple_fact_pu[]']];
+                
+                const tableData = [];
+                let totalHT = 0;
+                
+                for (let i = 0; i < produits.length; i++) {
+                    if (produits[i] && produits[i].trim() !== '') {
+                        const quantite = parseFloat(qty[i]) || 0;
+                        const prix = parseFloat(pu[i]) || 0;
+                        const montant = quantite * prix;
+                        totalHT += montant;
+                        
+                        tableData.push([
+                            produits[i] || '',
+                            quantite.toString(),
+                            prix.toFixed(2) + ' CHF',
+                            montant.toFixed(2) + ' CHF'
+                        ]);
+                    }
+                }
+                
+                if (tableData.length > 0) {
+                    pdf.autoTable({
+                        head: [['Produit', 'Quantité', 'Prix unitaire', 'Montant']],
+                        body: tableData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { fillColor: [244, 230, 0], textColor: [0, 0, 0] },
+                        styles: { fontSize: 10 }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 10;
+                    
+                    // Totals
+                    const tva = totalHT * 0.081;
+                    const totalTTC = totalHT + tva;
+                    
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('Total HT:', 130, yPos);
+                    pdf.setFont(undefined, 'normal');
+                    pdf.text(totalHT.toFixed(2) + ' CHF', 170, yPos, { align: 'right' });
+                    yPos += 6;
+                    
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('TVA 8.1%:', 130, yPos);
+                    pdf.setFont(undefined, 'normal');
+                    pdf.text(tva.toFixed(2) + ' CHF', 170, yPos, { align: 'right' });
+                    yPos += 6;
+                    
+                    pdf.setFont(undefined, 'bold');
+                    pdf.setFontSize(12);
+                    pdf.text('Total TTC:', 130, yPos);
+                    pdf.text(totalTTC.toFixed(2) + ' CHF', 170, yPos, { align: 'right' });
+                }
+            }
+            
+            return yPos;
+        }
+
+        // Generate Facturier PDF content
+        function generateFacturierPDF(pdf, data, yPos) {
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('FACTURE', 105, yPos, { align: 'center' });
+            yPos += 15;
+            
+            pdf.setFontSize(12);
+            pdf.text('INFORMATIONS CLIENT', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const clientInfo = [
+                ['Client:', data.fact_nom_prenom || ''],
+                ['N° Client:', data.fact_num_client || ''],
+                ['Adresse:', data.fact_adresse || ''],
+                ['Localité:', data.fact_localite || ''],
+                ['Date:', data.fact_date || ''],
+                ['Technicien:', data.fact_technicien || '']
+            ];
+            
+            clientInfo.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Products table
+            yPos += 10;
+            
+            if (data['fact_produit[]']) {
+                const produits = Array.isArray(data['fact_produit[]']) ? 
+                                data['fact_produit[]'] : [data['fact_produit[]']];
+                const qty = Array.isArray(data['fact_qty[]']) ? 
+                           data['fact_qty[]'] : [data['fact_qty[]']];
+                const pu = Array.isArray(data['fact_pu[]']) ? 
+                          data['fact_pu[]'] : [data['fact_pu[]']];
+                
+                const tableData = [];
+                let totalHT = 0;
+                
+                for (let i = 0; i < produits.length; i++) {
+                    if (produits[i] && produits[i].trim() !== '') {
+                        const quantite = parseFloat(qty[i]) || 0;
+                        const prix = parseFloat(pu[i]) || 0;
+                        const montant = quantite * prix;
+                        totalHT += montant;
+                        
+                        tableData.push([
+                            produits[i] || '',
+                            quantite.toString(),
+                            prix.toFixed(2) + ' CHF',
+                            montant.toFixed(2) + ' CHF'
+                        ]);
+                    }
+                }
+                
+                if (tableData.length > 0) {
+                    pdf.autoTable({
+                        head: [['Produit', 'Quantité', 'Prix unitaire', 'Montant']],
+                        body: tableData,
+                        startY: yPos,
+                        theme: 'grid',
+                        headStyles: { fillColor: [244, 230, 0], textColor: [0, 0, 0] },
+                        styles: { fontSize: 10 }
+                    });
+                    yPos = pdf.lastAutoTable.finalY + 10;
+                    
+                    // Totals
+                    const tva = totalHT * 0.081;
+                    const totalTTC = totalHT + tva;
+                    
+                    pdf.setDrawColor(0, 0, 0);
+                    pdf.line(110, yPos, 185, yPos);
+                    yPos += 5;
+                    
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('Total HT:', 130, yPos);
+                    pdf.setFont(undefined, 'normal');
+                    pdf.text(totalHT.toFixed(2) + ' CHF', 180, yPos, { align: 'right' });
+                    yPos += 6;
+                    
+                    pdf.setFont(undefined, 'bold');
+                    pdf.text('TVA 8.1%:', 130, yPos);
+                    pdf.setFont(undefined, 'normal');
+                    pdf.text(tva.toFixed(2) + ' CHF', 180, yPos, { align: 'right' });
+                    yPos += 8;
+                    
+                    pdf.setDrawColor(0, 0, 0);
+                    pdf.setLineWidth(0.5);
+                    pdf.line(110, yPos - 2, 185, yPos - 2);
+                    
+                    pdf.setFont(undefined, 'bold');
+                    pdf.setFontSize(14);
+                    pdf.text('Total TTC:', 130, yPos);
+                    pdf.text(totalTTC.toFixed(2) + ' CHF', 180, yPos, { align: 'right' });
+                }
+            }
+            
+            // Payment method
+            yPos += 15;
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(10);
+            pdf.text('Mode de paiement:', 15, yPos);
+            yPos += 6;
+            pdf.setFont(undefined, 'normal');
+            
+            const payments = [];
+            if (data.fact_paiement_bulletin) payments.push('Bulletin de versement');
+            if (data.fact_paiement_carte) payments.push('Carte bancaire');
+            if (data.fact_paiement_espece) payments.push('Espèce');
+            
+            payments.forEach(p => {
+                pdf.text('• ' + p, 20, yPos);
+                yPos += 5;
+            });
+            
+            return yPos;
+        }
+
+        // Generate Quittance PDF content
+        function generateQuittancePDF(pdf, data, yPos) {
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('QUITTANCE TRANSFERT DE MATÉRIEL', 105, yPos, { align: 'center' });
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            pdf.text(`Pour raccordement n° ${data.quit_numero || ''}`, 105, yPos, { align: 'center' });
+            yPos += 15;
+            
+            // Client info
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('INFORMATIONS', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const info = [
+                ['Date:', data.quit_date || ''],
+                ['Nom:', data.quit_nom || ''],
+                ['Raison sociale:', data.quit_raison_sociale || ''],
+                ['Adresse:', data.quit_adresse || ''],
+                ['NPA / Lieu:', data.quit_npa_lieu || '']
+            ];
+            
+            info.forEach(item => {
+                pdf.setFont(undefined, 'bold');
+                pdf.text(item[0], 15, yPos);
+                pdf.setFont(undefined, 'normal');
+                pdf.text(item[1], 50, yPos);
+                yPos += 7;
+            });
+            
+            // Material remis
+            yPos += 10;
+            pdf.setFont(undefined, 'bold');
+            pdf.setFontSize(12);
+            pdf.text('MATÉRIEL REMIS', 15, yPos);
+            yPos += 8;
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(10);
+            
+            const materielRemis = [];
+            if (data.quit_cle1) materielRemis.push(['Clé:', data.quit_cle1_detail || '']);
+            if (data.quit_cle2) materielRemis.push(['Clé:', data.quit_cle2_detail || '']);
+            if (data.quit_cle3) materielRemis.push(['Clé:', data.quit_cle3_detail || '']);
+            if (data.quit_badge1) materielRemis.push(['Badge:', data.quit_badge1_detail || '']);
+            if (data.quit_badge2) materielRemis.push(['Badge:', data.quit_badge2_detail || '']);
+            if (data.quit_dossier) materielRemis.push(['Dossier intervention:', data.quit_dossier_detail || '']);
+            if (data.quit_cle_systeme1) materielRemis.push(['Clé système alarme:', data.quit_cle_systeme1_detail || '']);
+            if (data.quit_cle_systeme2) materielRemis.push(['Clé système alarme:', data.quit_cle_systeme2_detail || '']);
+            if (data.quit_autre) materielRemis.push(['Autre:', data.quit_autre_detail || '']);
+            
+            materielRemis.forEach(item => {
+                pdf.text('• ' + item[0] + ' ' + item[1], 20, yPos);
+                yPos += 6;
+            });
+            
+            // Commentaire
+            if (data.quit_commentaire) {
+                yPos += 10;
+                pdf.setFont(undefined, 'bold');
+                pdf.setFontSize(12);
+                pdf.text('COMMENTAIRE', 15, yPos);
+                yPos += 8;
+                pdf.setFont(undefined, 'normal');
+                pdf.setFontSize(10);
+                
+                const lines = pdf.splitTextToSize(data.quit_commentaire, 170);
+                lines.forEach(line => {
+                    pdf.text(line, 15, yPos);
+                    yPos += 5;
+                });
+            }
+            
+            return yPos;
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+            let firstInvalidField = null;
+            
+            // Hide all validation messages
+            document.querySelectorAll('.validation-message').forEach(msg => {
+                msg.style.display = 'none';
+            });
+            
+            // Get current visible form
+            let currentForm = null;
+            let validationMessageId = null;
+            
+            if (currentDocument === 'Installation') {
+                currentForm = document.getElementById('installationForm');
+                validationMessageId = 'validationMessage';
+            } else if (currentDocument === 'SAV avec modifications') {
+                currentForm = document.getElementById('savModificationsForm');
+                validationMessageId = 'savModValidationMessage';
+            } else if (currentDocument === 'SAV démontage') {
+                currentForm = document.getElementById('savDemontageForm');
+                validationMessageId = 'savDemValidationMessage';
+            } else if (currentDocument === 'SAV simple') {
+                currentForm = document.getElementById('savSimpleForm');
+                validationMessageId = 'savSimpleValidationMessage';
+            }
+            
+            if (!currentForm) return true;
+            
+            // Check all required fields in current form
+            const requiredFields = currentForm.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                if (!field.value || field.value.trim() === '') {
+                    field.style.borderColor = '#ff0000';
+                    isValid = false;
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                } else {
+                    field.style.borderColor = '#e0e0e0';
+                }
+                
+                // Special validation for radio groups
+                if (field.type === 'radio') {
+                    const radioGroup = currentForm.querySelectorAll(`input[name="${field.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!isChecked) {
+                        isValid = false;
+                    }
+                }
+            });
+            
+            // Special validation for material table
+            if (currentDocument === 'Installation') {
+                const materielRows = document.querySelectorAll('#materielBody tr');
+                materielRows.forEach(row => {
+                    const nomInput = row.querySelector('input[name="materiel_nom[]"]');
+                    const qtyInput = row.querySelector('input[name="materiel_qty[]"]');
+                    const locInput = row.querySelector('input[name="materiel_loc[]"]');
+                    
+                    // If material name is filled, quantity and location become required
+                    if (nomInput && nomInput.value && nomInput.value.trim() !== '') {
+                        if (!qtyInput.value || qtyInput.value.trim() === '') {
+                            qtyInput.style.borderColor = '#ff0000';
+                            isValid = false;
+                            if (!firstInvalidField) {
+                                firstInvalidField = qtyInput;
+                            }
+                        } else {
+                            qtyInput.style.borderColor = '#e0e0e0';
+                        }
+                        
+                        if (!locInput.value || locInput.value.trim() === '') {
+                            locInput.style.borderColor = '#ff0000';
+                            isValid = false;
+                            if (!firstInvalidField) {
+                                firstInvalidField = locInput;
+                            }
+                        } else {
+                            locInput.style.borderColor = '#e0e0e0';
+                        }
+                    }
+                });
+            }
+            
+            if (!isValid) {
+                // Show validation message
+                if (validationMessageId) {
+                    const validationMessage = document.getElementById(validationMessageId);
+                    if (validationMessage) {
+                        validationMessage.style.display = 'block';
+                    }
+                }
+                
+                // Scroll to first invalid field
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidField.focus();
+                }
+            }
+            
+            return isValid;
         }
     </script>
 </body>
